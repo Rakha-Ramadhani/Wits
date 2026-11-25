@@ -87,6 +87,7 @@ modules:
         - virt-manager
         - virt-v2v
         - virt-viewer
+        - waydroid
         - wtype
         - ydotool
         # Bluefin DX also includes VS Code and Docker CE
