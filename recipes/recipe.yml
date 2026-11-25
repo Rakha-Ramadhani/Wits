@@ -3,43 +3,108 @@
 # image will be published to ghcr.io/<user>/<name>
 name: Wits
 # description will be included in the image's metadata
-description: This is my personal OS image.
+description: A Silverblue-based personal image with Bluefin DX tools, R, Posit RStudio, and Android development support.
 
-# the base image to build on top of (FROM) and the version tag to use
+# Use Silverblue as the base to avoid inheriting Bluefin's branding and artwork.
 base-image: ghcr.io/ublue-os/silverblue-main
-image-version: latest # You can pin to a specific version of Fedora as well
+image-version: latest
 
 # module configuration, executed in order
-# you can include multiple instances of the same module
 modules:
   - type: files
     files:
       - source: system
-        destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
+        destination: /
 
   - type: dnf
     repos:
       copr:
         - atim/starship
+      files:
+        - https://download.docker.com/linux/fedora/docker-ce.repo
+        - https://packages.microsoft.com/yumrepos/vscode/config.repo
     install:
       packages:
+        # Existing personal tools
         - micro
         - starship
+        # R and the official Posit RStudio Desktop RPM (RHEL 9 build)
+        - R
+        - https://download1.rstudio.org/electron/rhel9/x86_64/rstudio-2025.09.1-401-x86_64.rpm
+        # Bluefin DX Fedora-repository developer, container, and virtualization tools
+        - android-tools
+        - bcc
+        - bpftop
+        - bpftrace
+        - cascadia-code-fonts
+        - cockpit-bridge
+        - cockpit-machines
+        - cockpit-networkmanager
+        - cockpit-ostree
+        - cockpit-podman
+        - cockpit-selinux
+        - cockpit-storaged
+        - cockpit-system
+        - dbus-x11
+        - docker-buildx-plugin
+        - docker-ce
+        - docker-ce-cli
+        - docker-compose-plugin
+        - containerd.io
+        - edk2-ovmf
+        - flatpak-builder
+        - genisoimage
+        - git-subtree
+        - git-svn
+        - iotop
+        - libvirt
+        - libvirt-nss
+        - nicstat
+        - numactl
+        - osbuild-selinux
+        - p7zip
+        - p7zip-plugins
+        - podman-compose
+        - podman-machine
+        - podman-tui
+        - qemu
+        - qemu-char-spice
+        - qemu-device-display-virtio-gpu
+        - qemu-device-display-virtio-vga
+        - qemu-device-usb-redirect
+        - qemu-img
+        - qemu-system-x86-core
+        - qemu-user-binfmt
+        - qemu-user-static
+        - sysprof
+        - incus
+        - incus-agent
+        - lxc
+        - tiptop
+        - trace-cmd
+        - udica
+        - util-linux-script
+        - virt-manager
+        - virt-v2v
+        - virt-viewer
+        - wtype
+        - ydotool
+        # Bluefin DX also includes VS Code and Docker CE
+        - code
     remove:
       packages:
-        # example: removing firefox (in favor of the flatpak)
-        # "firefox" is the main package, "firefox-langpacks" is a dependency
         - firefox
-        - firefox-langpacks # also remove firefox dependency (not required for all packages, this is a special case)
+        - firefox-langpacks
 
   - type: default-flatpaks
     configurations:
-      - notify: true # Send notification after install/uninstall is finished (true/false)
+      - notify: true
         scope: system
-        # If no repo information is specified, Flathub will be used by default
-        install: # system flatpaks we want all users to have and not remove
+        install:
           - org.mozilla.firefox
           - org.gnome.Loupe
-      - scope: user # Also add Flathub user repo, but no user packages
+          # Android Studio includes the IDE; install the SDK/emulator from its SDK Manager.
+          - com.google.AndroidStudio
+      - scope: user
 
-  - type: signing # this sets up the proper policy & signing files for signed images to work fully
+  - type: signing
